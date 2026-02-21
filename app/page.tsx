@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import type { UgandaUser, ScrapeResponse } from "@/lib/types/user";
+import { WEB3_SKILLS, detectWeb3Skills, type Web3Skill } from "@/lib/web3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -72,6 +74,9 @@ export default function HomePage() {
   const [hasBlog, setHasBlog] = useState(false);
   const [hasEmail, setHasEmail] = useState(false);
 
+  // --- web3 filters ---
+  const [selectedWeb3Skills, setSelectedWeb3Skills] = useState<Web3Skill[]>([]);
+
   // --- toggle location ---
   const toggleLocation = useCallback(
     (loc: string) => {
@@ -81,6 +86,13 @@ export default function HomePage() {
     },
     []
   );
+
+  // --- toggle web3 skill ---
+  const toggleWeb3Skill = useCallback((skill: Web3Skill) => {
+    setSelectedWeb3Skills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
+  }, []);
 
   // --- run scrape ---
   const runScrape = useCallback(async () => {
@@ -119,6 +131,16 @@ export default function HomePage() {
     }
   }, [locations, minRepos, minFollowers, maxPages, concurrency, minScore]);
 
+  // --- web3 skills map (computed once per response) ---
+  const web3SkillsMap = useMemo(() => {
+    if (!response) return new Map<string, Web3Skill[]>();
+    const map = new Map<string, Web3Skill[]>();
+    for (const u of response.users) {
+      map.set(u.login, detectWeb3Skills(u.bio, u.company, u.blog));
+    }
+    return map;
+  }, [response]);
+
   // --- filtered + sorted users ---
   const filteredUsers = useMemo(() => {
     if (!response) return [];
@@ -141,6 +163,14 @@ export default function HomePage() {
     if (hasCompany) users = users.filter((u) => !!u.company);
     if (hasBlog) users = users.filter((u) => !!u.blog);
     if (hasEmail) users = users.filter((u) => !!u.email);
+
+    // web3 skill filters
+    if (selectedWeb3Skills.length > 0) {
+      users = users.filter((u) => {
+        const skills = web3SkillsMap.get(u.login) ?? [];
+        return selectedWeb3Skills.some((s) => skills.includes(s));
+      });
+    }
 
     // sort
     switch (sortKey) {
@@ -166,7 +196,7 @@ export default function HomePage() {
     }
 
     return users;
-  }, [response, search, sortKey, hasBio, hasCompany, hasBlog, hasEmail]);
+  }, [response, search, sortKey, hasBio, hasCompany, hasBlog, hasEmail, selectedWeb3Skills, web3SkillsMap]);
 
   // ---------------------------------------------------------------------------
   // Render
@@ -286,64 +316,107 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ---- Client-side Filters ---- */}
+      {/* ---- Client-side Filters with Tabs ---- */}
       {response && (
         <Card>
           <CardHeader>
             <CardTitle>Filter &amp; Sort</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap items-center gap-4">
-              <Input
-                type="text"
-                placeholder="Search login / name / bio…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-56"
-              />
-              <div className="space-y-1">
-                <Label htmlFor="sortKey">Sort</Label>
-                <select
-                  id="sortKey"
-                  value={sortKey}
-                  onChange={(e) => setSortKey(e.target.value as SortKey)}
-                  className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                >
-                  <option value="score">Score ↓</option>
-                  <option value="followers">Followers ↓</option>
-                  <option value="repos">Repos ↓</option>
-                  <option value="newest">Newest</option>
-                </select>
-              </div>
-              <Label className="font-normal">
-                <Checkbox
-                  checked={hasBio}
-                  onChange={(e) => setHasBio(e.target.checked)}
-                />{" "}
-                Has bio
-              </Label>
-              <Label className="font-normal">
-                <Checkbox
-                  checked={hasCompany}
-                  onChange={(e) => setHasCompany(e.target.checked)}
-                />{" "}
-                Has company
-              </Label>
-              <Label className="font-normal">
-                <Checkbox
-                  checked={hasBlog}
-                  onChange={(e) => setHasBlog(e.target.checked)}
-                />{" "}
-                Has blog
-              </Label>
-              <Label className="font-normal">
-                <Checkbox
-                  checked={hasEmail}
-                  onChange={(e) => setHasEmail(e.target.checked)}
-                />{" "}
-                Has email
-              </Label>
-            </div>
+            <Tabs defaultValue="general">
+              <TabsList>
+                <TabsTrigger value="general">General</TabsTrigger>
+                <TabsTrigger value="web3">Web3 Skills</TabsTrigger>
+              </TabsList>
+
+              {/* General filters */}
+              <TabsContent value="general" className="pt-4">
+                <div className="flex flex-wrap items-center gap-4">
+                  <Input
+                    type="text"
+                    placeholder="Search login / name / bio…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-56"
+                  />
+                  <div className="space-y-1">
+                    <Label htmlFor="sortKey">Sort</Label>
+                    <select
+                      id="sortKey"
+                      value={sortKey}
+                      onChange={(e) => setSortKey(e.target.value as SortKey)}
+                      className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+                    >
+                      <option value="score">Score ↓</option>
+                      <option value="followers">Followers ↓</option>
+                      <option value="repos">Repos ↓</option>
+                      <option value="newest">Newest</option>
+                    </select>
+                  </div>
+                  <Label className="font-normal">
+                    <Checkbox
+                      checked={hasBio}
+                      onChange={(e) => setHasBio(e.target.checked)}
+                    />{" "}
+                    Has bio
+                  </Label>
+                  <Label className="font-normal">
+                    <Checkbox
+                      checked={hasCompany}
+                      onChange={(e) => setHasCompany(e.target.checked)}
+                    />{" "}
+                    Has company
+                  </Label>
+                  <Label className="font-normal">
+                    <Checkbox
+                      checked={hasBlog}
+                      onChange={(e) => setHasBlog(e.target.checked)}
+                    />{" "}
+                    Has blog
+                  </Label>
+                  <Label className="font-normal">
+                    <Checkbox
+                      checked={hasEmail}
+                      onChange={(e) => setHasEmail(e.target.checked)}
+                    />{" "}
+                    Has email
+                  </Label>
+                </div>
+              </TabsContent>
+
+              {/* Web3 skill filters */}
+              <TabsContent value="web3" className="pt-4">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Filter developers by Web3 &amp; blockchain skills detected in their bio.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {WEB3_SKILLS.map((skill) => (
+                    <Badge
+                      key={skill}
+                      variant={
+                        selectedWeb3Skills.includes(skill)
+                          ? "default"
+                          : "outline"
+                      }
+                      className="cursor-pointer select-none capitalize"
+                      onClick={() => toggleWeb3Skill(skill)}
+                    >
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+                {selectedWeb3Skills.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => setSelectedWeb3Skills([])}
+                  >
+                    Clear all
+                  </Button>
+                )}
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       )}
@@ -380,6 +453,7 @@ export default function HomePage() {
                 <TableHead>Username</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Location</TableHead>
+                <TableHead>Web3 Skills</TableHead>
                 <TableHead>Followers</TableHead>
                 <TableHead>Repos</TableHead>
                 <TableHead>Score</TableHead>
@@ -387,38 +461,58 @@ export default function HomePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((u) => (
-                <TableRow key={u.login}>
-                  <TableCell>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={u.avatar_url}
-                      alt={u.login}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{u.login}</TableCell>
-                  <TableCell>{u.name ?? "—"}</TableCell>
-                  <TableCell>{u.location ?? "—"}</TableCell>
-                  <TableCell>{u.followers}</TableCell>
-                  <TableCell>{u.public_repos}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{u.confidenceScore}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <a
-                      href={u.html_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline underline-offset-4 hover:text-primary/80"
-                    >
-                      View
-                    </a>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filteredUsers.map((u) => {
+                const web3 = web3SkillsMap.get(u.login) ?? [];
+                return (
+                  <TableRow key={u.login}>
+                    <TableCell>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={u.avatar_url}
+                        alt={u.login}
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">{u.login}</TableCell>
+                    <TableCell>{u.name ?? "—"}</TableCell>
+                    <TableCell>{u.location ?? "—"}</TableCell>
+                    <TableCell>
+                      {web3.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {web3.map((s) => (
+                            <Badge
+                              key={s}
+                              variant="secondary"
+                              className="text-xs capitalize"
+                            >
+                              {s}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>{u.followers}</TableCell>
+                    <TableCell>{u.public_repos}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{u.confidenceScore}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <a
+                        href={u.html_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline underline-offset-4 hover:text-primary/80"
+                      >
+                        View
+                      </a>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </Card>
