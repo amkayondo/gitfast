@@ -131,6 +131,16 @@ export default function HomePage() {
     }
   }, [locations, minRepos, minFollowers, maxPages, concurrency, minScore]);
 
+  // --- web3 skills map (computed once per response) ---
+  const web3SkillsMap = useMemo(() => {
+    if (!response) return new Map<string, Web3Skill[]>();
+    const map = new Map<string, Web3Skill[]>();
+    for (const u of response.users) {
+      map.set(u.login, detectWeb3Skills(u.bio, u.company, u.blog));
+    }
+    return map;
+  }, [response]);
+
   // --- filtered + sorted users ---
   const filteredUsers = useMemo(() => {
     if (!response) return [];
@@ -157,7 +167,7 @@ export default function HomePage() {
     // web3 skill filters
     if (selectedWeb3Skills.length > 0) {
       users = users.filter((u) => {
-        const skills = detectWeb3Skills(u.bio, u.company, u.blog);
+        const skills = web3SkillsMap.get(u.login) ?? [];
         return selectedWeb3Skills.some((s) => skills.includes(s));
       });
     }
@@ -186,7 +196,7 @@ export default function HomePage() {
     }
 
     return users;
-  }, [response, search, sortKey, hasBio, hasCompany, hasBlog, hasEmail, selectedWeb3Skills]);
+  }, [response, search, sortKey, hasBio, hasCompany, hasBlog, hasEmail, selectedWeb3Skills, web3SkillsMap]);
 
   // ---------------------------------------------------------------------------
   // Render
@@ -452,7 +462,7 @@ export default function HomePage() {
             </TableHeader>
             <TableBody>
               {filteredUsers.map((u) => {
-                const web3 = detectWeb3Skills(u.bio, u.company, u.blog);
+                const web3 = web3SkillsMap.get(u.login) ?? [];
                 return (
                   <TableRow key={u.login}>
                     <TableCell>
