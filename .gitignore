@@ -2,3 +2,8 @@ node_modules/
 .env
 uganda_users.json
 uganda_users.csv
+
+# Next.js
+.next/
+out/
+next-env.d.ts

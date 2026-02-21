@@ -1,6 +1,6 @@
 # gitfast
 
-A Node.js script that finds GitHub users who appear to be in **Uganda** by searching GitHub's public API and exporting the results to `uganda_users.json` and `uganda_users.csv`.
+A **Next.js (App Router)** web app and CLI tool that discovers GitHub users who appear to be in **Uganda** using the GitHub API. Search, filter, review results, and download JSON/CSV.
 
 > **Note:** GitHub's `location` field is free-text and self-reported. Results are **best-effort** and may include false positives or miss users who haven't filled in their location.
 
@@ -28,7 +28,44 @@ cp .env.example .env
 
 ---
 
-## Usage
+## Web App (Next.js)
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to use the web UI.
+
+### Features
+
+- **Search form** — select cities, set min repos/followers, max pages, concurrency, and min confidence score
+- **Results table** — avatar, username, name, location, followers, repos, confidence score, profile link
+- **Client-side filters** — text search (login/name/bio), "has bio", "has company", "has blog", "has email"
+- **Sorting** — by score, followers, repos, or newest
+- **Download JSON / CSV** — export results as attachment files
+
+### API Endpoints
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `POST` | `/api/scrape` | Run a scrape with configurable parameters |
+| `GET` | `/api/export/json?runId=...` | Download JSON results |
+| `GET` | `/api/export/csv?runId=...` | Download CSV results |
+
+### Confidence Scoring
+
+Each user is assigned a score (0–100) based on their location:
+- **100** — location includes "uganda"
+- **85** — location includes "kampala"
+- **75** — other known Uganda cities
+- **50** — "UG" or "U.G." abbreviation
+- **0** — no match
+
+---
+
+## CLI Scraper
 
 ```bash
 npm start

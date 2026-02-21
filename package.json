@@ -5,6 +5,9 @@
   "type": "module",
   "main": "src/scraper.js",
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start:next": "next start",
     "start": "node src/scraper.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
@@ -13,11 +16,19 @@
   },
   "dependencies": {
     "@octokit/rest": "^22.0.1",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "csv-writer": "^1.6.0",
     "dotenv": "^17.3.1",
-    "p-limit": "^7.3.0"
+    "next": "^16.1.6",
+    "p-limit": "^7.3.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.6"
   }
 }
