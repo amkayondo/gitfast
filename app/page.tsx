@@ -2,6 +2,20 @@
 
 import { useState, useMemo, useCallback } from "react";
 import type { UgandaUser, ScrapeResponse } from "@/lib/types/user";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -159,122 +173,112 @@ export default function HomePage() {
   // ---------------------------------------------------------------------------
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "2rem 1rem" }}>
-      <h1>🇺🇬 GitHub Uganda User Finder</h1>
+    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-8">
+      <h1 className="text-3xl font-bold tracking-tight">
+        🇺🇬 GitHub Uganda User Finder
+      </h1>
 
       {/* ---- Search Form ---- */}
-      <fieldset style={{ marginBottom: "1.5rem" }}>
-        <legend>
-          <strong>Search Settings</strong>
-        </legend>
-
-        <div style={{ marginBottom: "0.75rem" }}>
-          <strong>Locations:</strong>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "0.25rem" }}>
-            {ALL_LOCATIONS.map((loc) => (
-              <label key={loc} style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                <input
-                  type="checkbox"
-                  checked={locations.includes(loc)}
-                  onChange={() => toggleLocation(loc)}
-                />
-                {loc}
-              </label>
-            ))}
+      <Card>
+        <CardHeader>
+          <CardTitle>Search Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label className="mb-2 text-sm font-semibold">Locations</Label>
+            <div className="flex flex-wrap gap-3 mt-1">
+              {ALL_LOCATIONS.map((loc) => (
+                <Label key={loc} className="font-normal">
+                  <Checkbox
+                    checked={locations.includes(loc)}
+                    onChange={() => toggleLocation(loc)}
+                  />
+                  {loc}
+                </Label>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "0.75rem" }}>
-          <label>
-            Min repos:{" "}
-            <input
-              type="number"
-              min={0}
-              value={minRepos}
-              onChange={(e) => setMinRepos(Number(e.target.value))}
-              style={{ width: 60 }}
-            />
-          </label>
-          <label>
-            Min followers:{" "}
-            <input
-              type="number"
-              min={0}
-              value={minFollowers}
-              onChange={(e) => setMinFollowers(Number(e.target.value))}
-              style={{ width: 60 }}
-            />
-          </label>
-          <label>
-            Max pages/query:{" "}
-            <input
-              type="number"
-              min={1}
-              max={10}
-              value={maxPages}
-              onChange={(e) => setMaxPages(Number(e.target.value))}
-              style={{ width: 60 }}
-            />
-          </label>
-          <label>
-            Concurrency:{" "}
-            <input
-              type="number"
-              min={1}
-              max={10}
-              value={concurrency}
-              onChange={(e) => setConcurrency(Number(e.target.value))}
-              style={{ width: 60 }}
-            />
-          </label>
-          <label>
-            Min score:{" "}
-            <input
-              type="number"
-              min={0}
-              max={100}
-              value={minScore}
-              onChange={(e) => setMinScore(Number(e.target.value))}
-              style={{ width: 60 }}
-            />
-          </label>
-        </div>
+          <div className="flex flex-wrap gap-4">
+            <div className="space-y-1">
+              <Label htmlFor="minRepos">Min repos</Label>
+              <Input
+                id="minRepos"
+                type="number"
+                min={0}
+                value={minRepos}
+                onChange={(e) => setMinRepos(Number(e.target.value))}
+                className="w-20"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="minFollowers">Min followers</Label>
+              <Input
+                id="minFollowers"
+                type="number"
+                min={0}
+                value={minFollowers}
+                onChange={(e) => setMinFollowers(Number(e.target.value))}
+                className="w-20"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="maxPages">Max pages/query</Label>
+              <Input
+                id="maxPages"
+                type="number"
+                min={1}
+                max={10}
+                value={maxPages}
+                onChange={(e) => setMaxPages(Number(e.target.value))}
+                className="w-20"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="concurrency">Concurrency</Label>
+              <Input
+                id="concurrency"
+                type="number"
+                min={1}
+                max={10}
+                value={concurrency}
+                onChange={(e) => setConcurrency(Number(e.target.value))}
+                className="w-20"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="minScore">Min score</Label>
+              <Input
+                id="minScore"
+                type="number"
+                min={0}
+                max={100}
+                value={minScore}
+                onChange={(e) => setMinScore(Number(e.target.value))}
+                className="w-20"
+              />
+            </div>
+          </div>
 
-        <button
-          onClick={runScrape}
-          disabled={loading || locations.length === 0}
-          style={{ padding: "0.5rem 1.5rem", fontWeight: "bold", cursor: "pointer" }}
-        >
-          {loading ? "Searching…" : "Run Scrape"}
-        </button>
-      </fieldset>
+          <Button
+            onClick={runScrape}
+            disabled={loading || locations.length === 0}
+          >
+            {loading ? "Searching…" : "Run Scrape"}
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* ---- Error ---- */}
       {error && (
-        <div
-          style={{
-            padding: "0.75rem",
-            background: "#fee",
-            border: "1px solid #c00",
-            borderRadius: 4,
-            marginBottom: "1rem",
-          }}
-        >
+        <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive text-sm">
           ❌ {error}
         </div>
       )}
 
       {/* ---- Stats ---- */}
       {response && (
-        <div
-          style={{
-            padding: "0.75rem",
-            background: "#eef6ee",
-            border: "1px solid #090",
-            borderRadius: 4,
-            marginBottom: "1rem",
-          }}
-        >
+        <div className="rounded-lg border border-green-600 bg-green-50 p-4 text-sm dark:bg-green-950/30">
           <strong>Results:</strong> {response.stats.totalCandidates} total
           candidates, {response.stats.uniqueUsers} unique,{" "}
           {response.stats.keptAfterFilter} kept after filter.{" "}
@@ -284,170 +288,141 @@ export default function HomePage() {
 
       {/* ---- Client-side Filters ---- */}
       {response && (
-        <fieldset style={{ marginBottom: "1rem" }}>
-          <legend>
-            <strong>Filter &amp; Sort</strong>
-          </legend>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "center" }}>
-            <input
-              type="text"
-              placeholder="Search login / name / bio…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{ padding: "0.3rem 0.5rem", width: 220 }}
-            />
-            <label>
-              Sort:{" "}
-              <select
-                value={sortKey}
-                onChange={(e) => setSortKey(e.target.value as SortKey)}
-              >
-                <option value="score">Score ↓</option>
-                <option value="followers">Followers ↓</option>
-                <option value="repos">Repos ↓</option>
-                <option value="newest">Newest</option>
-              </select>
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={hasBio}
-                onChange={() => setHasBio(!hasBio)}
-              />{" "}
-              Has bio
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={hasCompany}
-                onChange={() => setHasCompany(!hasCompany)}
-              />{" "}
-              Has company
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={hasBlog}
-                onChange={() => setHasBlog(!hasBlog)}
-              />{" "}
-              Has blog
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={hasEmail}
-                onChange={() => setHasEmail(!hasEmail)}
-              />{" "}
-              Has email
-            </label>
-          </div>
-        </fieldset>
+        <Card>
+          <CardHeader>
+            <CardTitle>Filter &amp; Sort</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-center gap-4">
+              <Input
+                type="text"
+                placeholder="Search login / name / bio…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-56"
+              />
+              <div className="space-y-1">
+                <Label htmlFor="sortKey">Sort</Label>
+                <select
+                  id="sortKey"
+                  value={sortKey}
+                  onChange={(e) => setSortKey(e.target.value as SortKey)}
+                  className="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+                >
+                  <option value="score">Score ↓</option>
+                  <option value="followers">Followers ↓</option>
+                  <option value="repos">Repos ↓</option>
+                  <option value="newest">Newest</option>
+                </select>
+              </div>
+              <Label className="font-normal">
+                <Checkbox
+                  checked={hasBio}
+                  onChange={(e) => setHasBio(e.target.checked)}
+                />{" "}
+                Has bio
+              </Label>
+              <Label className="font-normal">
+                <Checkbox
+                  checked={hasCompany}
+                  onChange={(e) => setHasCompany(e.target.checked)}
+                />{" "}
+                Has company
+              </Label>
+              <Label className="font-normal">
+                <Checkbox
+                  checked={hasBlog}
+                  onChange={(e) => setHasBlog(e.target.checked)}
+                />{" "}
+                Has blog
+              </Label>
+              <Label className="font-normal">
+                <Checkbox
+                  checked={hasEmail}
+                  onChange={(e) => setHasEmail(e.target.checked)}
+                />{" "}
+                Has email
+              </Label>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* ---- Download Buttons ---- */}
       {response && (
-        <div style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem" }}>
-          <a
-            href={`/api/export/json?runId=${encodeURIComponent(response.runId)}`}
-            download
-            style={btnStyle}
-          >
-            ⬇ Download JSON
-          </a>
-          <a
-            href={`/api/export/csv?runId=${encodeURIComponent(response.runId)}`}
-            download
-            style={btnStyle}
-          >
-            ⬇ Download CSV
-          </a>
+        <div className="flex gap-3">
+          <Button asChild>
+            <a
+              href={`/api/export/json?runId=${encodeURIComponent(response.runId)}`}
+              download
+            >
+              ⬇ Download JSON
+            </a>
+          </Button>
+          <Button asChild variant="outline">
+            <a
+              href={`/api/export/csv?runId=${encodeURIComponent(response.runId)}`}
+              download
+            >
+              ⬇ Download CSV
+            </a>
+          </Button>
         </div>
       )}
 
       {/* ---- Results Table ---- */}
       {filteredUsers.length > 0 && (
-        <div style={{ overflowX: "auto" }}>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "0.9rem",
-            }}
-          >
-            <thead>
-              <tr>
-                {[
-                  "",
-                  "Username",
-                  "Name",
-                  "Location",
-                  "Followers",
-                  "Repos",
-                  "Score",
-                  "Profile",
-                ].map((h) => (
-                  <th
-                    key={h}
-                    style={{
-                      borderBottom: "2px solid #333",
-                      padding: "0.4rem",
-                      textAlign: "left",
-                    }}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12"></TableHead>
+                <TableHead>Username</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Followers</TableHead>
+                <TableHead>Repos</TableHead>
+                <TableHead>Score</TableHead>
+                <TableHead>Profile</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredUsers.map((u) => (
-                <tr key={u.login}>
-                  <td style={cellStyle}>
+                <TableRow key={u.login}>
+                  <TableCell>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={u.avatar_url}
                       alt={u.login}
                       width={32}
                       height={32}
-                      style={{ borderRadius: "50%" }}
+                      className="rounded-full"
                     />
-                  </td>
-                  <td style={cellStyle}>{u.login}</td>
-                  <td style={cellStyle}>{u.name ?? "—"}</td>
-                  <td style={cellStyle}>{u.location ?? "—"}</td>
-                  <td style={cellStyle}>{u.followers}</td>
-                  <td style={cellStyle}>{u.public_repos}</td>
-                  <td style={cellStyle}>{u.confidenceScore}</td>
-                  <td style={cellStyle}>
-                    <a href={u.html_url} target="_blank" rel="noopener noreferrer">
+                  </TableCell>
+                  <TableCell className="font-medium">{u.login}</TableCell>
+                  <TableCell>{u.name ?? "—"}</TableCell>
+                  <TableCell>{u.location ?? "—"}</TableCell>
+                  <TableCell>{u.followers}</TableCell>
+                  <TableCell>{u.public_repos}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{u.confidenceScore}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <a
+                      href={u.html_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline underline-offset-4 hover:text-primary/80"
+                    >
                       View
                     </a>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
-
-const cellStyle: React.CSSProperties = {
-  borderBottom: "1px solid #ddd",
-  padding: "0.4rem",
-};
-
-const btnStyle: React.CSSProperties = {
-  display: "inline-block",
-  padding: "0.5rem 1rem",
-  background: "#0070f3",
-  color: "#fff",
-  borderRadius: 4,
-  textDecoration: "none",
-  fontWeight: "bold",
-};
