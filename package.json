@@ -1,0 +1,23 @@
+{
+  "name": "gitfast",
+  "version": "1.0.0",
+  "description": "GitHub Uganda user scraper – finds GitHub users whose location matches Uganda and exports the results to JSON and CSV.",
+  "type": "module",
+  "main": "src/scraper.js",
+  "scripts": {
+    "start": "node src/scraper.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@octokit/rest": "^22.0.1",
+    "csv-writer": "^1.6.0",
+    "dotenv": "^17.3.1",
+    "p-limit": "^7.3.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
