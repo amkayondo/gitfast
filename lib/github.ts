@@ -41,7 +41,10 @@ async function ghFetch(
   maxRetries = 3
 ): Promise<Response> {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const res = await fetch(url, { headers: headers() });
+    const res = await fetch(url, {
+      headers: headers(),
+      signal: AbortSignal.timeout(30_000),
+    });
 
     if (res.ok) return res;
 

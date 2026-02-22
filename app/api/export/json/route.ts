@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cacheGet } from "@/lib/cache";
 
+export const maxDuration = 30;
+
 export async function GET(request: NextRequest) {
   const runId = request.nextUrl.searchParams.get("runId");
   if (!runId) {

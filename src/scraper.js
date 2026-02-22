@@ -52,6 +52,9 @@ const SEARCH_QUERIES = [
 const octokit = new Octokit({
   auth: GITHUB_TOKEN,
   userAgent: "gitfast-uganda-scraper/1.0.0",
+  request: {
+    timeout: 30_000,
+  },
 });
 
 // ---------------------------------------------------------------------------
