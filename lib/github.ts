@@ -21,6 +21,9 @@ function sleep(ms: number): Promise<void> {
 
 const GITHUB_API = "https://api.github.com";
 
+/** Per-request timeout for GitHub API calls (ms). */
+const GITHUB_API_TIMEOUT_MS = 30_000;
+
 function headers(): HeadersInit {
   const h: Record<string, string> = {
     Accept: "application/vnd.github+json",
@@ -41,7 +44,10 @@ async function ghFetch(
   maxRetries = 3
 ): Promise<Response> {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const res = await fetch(url, { headers: headers() });
+    const res = await fetch(url, {
+      headers: headers(),
+      signal: AbortSignal.timeout(GITHUB_API_TIMEOUT_MS),
+    });
 
     if (res.ok) return res;
 

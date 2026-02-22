@@ -3,6 +3,8 @@ import { scrapeUsers, ScrapeOptions } from "@/lib/github";
 import { cacheSet } from "@/lib/cache";
 import { ScrapeRequest, ScrapeResponse } from "@/lib/types/user";
 
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   let body: ScrapeRequest;
   try {
